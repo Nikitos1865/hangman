@@ -36,6 +36,23 @@ class Hangman
         word_choice
     end
 
+    def guess
+        valid = false 
+        while !valid
+            letter = gets.chomp
+            if letter.length != 1
+                puts "Guess exactly 1 letter"
+            else 
+                valid = true
+                word_choice.split('').each_with_index do |char, index|
+                    if letter == char
+                        board[index] = letter
+                    end
+                end 
+            end 
+        end
+    end 
+
 
 
     
@@ -48,3 +65,8 @@ puts hang.board
 
 
 hang.show_board
+
+12.times do 
+    hang.guess
+    hang.show_board
+end 
