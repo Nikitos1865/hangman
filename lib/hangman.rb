@@ -1,10 +1,25 @@
+require 'json'
+require 'date'
 class Hangman
-    attr_accessor :word_choice, :board
+    attr_accessor :word_choice, :board, :lives_left
 
-    def initialize
-        @word_choice = choose_word
-        @board = make_board(word_choice)
-    end 
+    def initialize(*args)
+        if args.length == 0 
+            @word_choice = choose_word
+            @board = make_board(word_choice)
+            @lives_left = 8
+            show_board
+            show_lives
+            play
+        elsif args.length == 3
+            @word_choice = args[0]
+            @board = args[1]
+            @lives_left = args[2]
+            show_board
+            show_lives
+            play
+        end 
+    end
 
     def make_board(word) 
         board = ''
@@ -13,11 +28,19 @@ class Hangman
     end 
 
     def show_board
-        string = ''
+        string = 'Here are the letters: '
         board.split('').each do |letter|
             string << letter+' '
         end
         puts string
+    end 
+
+    def show_lives
+        lives = ''
+        lives_left.times do
+            lives << '* '
+        end 
+        puts "Lives left: #{lives}"
     end 
 
 
@@ -36,37 +59,60 @@ class Hangman
         word_choice
     end
 
-    def guess
+    def turn
         valid = false 
         while !valid
-            letter = gets.chomp
+            letter = gets.downcase.chomp
             if letter.length != 1
                 puts "Guess exactly 1 letter"
-            else 
+            elsif letter == "1"
+                puts save_game
+            elsif letter == "2"
+                exit! 
+            else
                 valid = true
-                word_choice.split('').each_with_index do |char, index|
-                    if letter == char
-                        board[index] = letter
-                    end
-                end 
+                mark_board(letter)
             end 
+        end
+    end
+    
+    def mark_board(letter)
+        good_guess = false
+        word_choice.split('').each_with_index do |char, index|
+            if letter == char
+                board[index] = letter
+                good_guess = true
+            end
+        end
+        if good_guess == false
+            @lives_left -= 1
+        end
+    end
+
+    def play  
+        while board.include?("_") && lives_left > 0
+            turn
+            show_board
+            show_lives
+        end 
+        if lives_left == 0 
+            puts "You have lost"
+        else puts "You won!"    
+        end 
+    end 
+
+    def save_game
+        Dir.mkdir('save_files') if !Dir.exist?('save_files')
+        game = {word: word_choice, board: board, lives: lives_left}
+        json = JSON.generate(game)
+        date = DateTime.now()
+        filename = "./save_files/saved_game_#{date.strftime('%m-%d-%Y_%I:%M%p')}"
+        File.open(filename, 'w') do |file|
+            file.puts(json)
         end
     end 
 
-
-
-    
 end 
 
-hang = Hangman.new
-
-puts hang.word_choice
-puts hang.board
 
 
-hang.show_board
-
-12.times do 
-    hang.guess
-    hang.show_board
-end 
