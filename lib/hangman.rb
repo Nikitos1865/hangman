@@ -4,21 +4,21 @@ class Hangman
     attr_accessor :word_choice, :board, :lives_left
 
     def initialize(*args)
+        puts "Input letter to guess, 1 to save game and exit, and 2 to exit without saving"
         if args.length == 0 
             @word_choice = choose_word
             @board = make_board(word_choice)
             @lives_left = 8
             show_board
             show_lives
-            play
         elsif args.length == 3
             @word_choice = args[0]
             @board = args[1]
             @lives_left = args[2]
             show_board
             show_lives
-            play
         end 
+        play
     end
 
     def make_board(word) 
@@ -67,6 +67,7 @@ class Hangman
                 puts "Guess exactly 1 letter"
             elsif letter == "1"
                 puts save_game
+                exit!
             elsif letter == "2"
                 exit! 
             else
@@ -97,7 +98,10 @@ class Hangman
         end 
         if lives_left == 0 
             puts "You have lost"
-        else puts "You won!"    
+            puts "The word was #{word_choice}"
+            return 0
+        else puts "You won!"  
+            return 1  
         end 
     end 
 
